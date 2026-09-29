@@ -1,0 +1,205 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Uzoni — "ledger"
+  The reference is the hishab khata: ruled rows, a hard vertical rule before the
+  amount column, figures in a fixed tabular column. Rows carry the information;
+  cards are reserved for things that really are objects (an account, a budget).
+  One typeface, Inter, with tabular lining figures doing the columnar work.
+*/
+
+@layer base {
+  :root {
+    --paper:        #fbfbfd;
+    --surface:      #ffffff;
+    --surface-sunk: #f4f5f9;
+    --rule:         #e6e8ef;
+    --rule-strong:  #d2d6e2;
+    --ink:          #14161c;
+    --ink-soft:     #454b5c;
+    --ink-muted:    #6b7284;
+    --accent:       #3b45d6;
+    --accent-soft:  #eef0fe;
+    --credit:       #0f7b4f;
+    --credit-soft:  #e7f5ee;
+    --debit:        #be3b3b;
+    --debit-soft:   #fdedec;
+    --warn:         #b45309;
+    --warn-soft:    #fdf3e3;
+    --ring:         #97a0f0;
+
+    /* The currency symbol's own face. Inter has no Bengali taka sign, so
+       without this the OS substitutes whatever Bengali font it happens to
+       have — a different size and weight on every machine. */
+    --font-symbol:  'Noto Sans Bengali', Inter, system-ui, sans-serif;
+  }
+
+  :root[data-theme='dark'] {
+    --paper:        #0f1116;
+    --surface:      #171a21;
+    --surface-sunk: #1e222b;
+    --rule:         #262a34;
+    --rule-strong:  #363c4a;
+    --ink:          #edeff4;
+    --ink-soft:     #c2c7d4;
+    --ink-muted:    #8d95a8;
+    --accent:       #8e97ff;
+    --accent-soft:  #23263c;
+    --credit:       #4ade80;
+    --credit-soft:  #14271e;
+    --debit:        #f87171;
+    --debit-soft:   #2a1717;
+    --warn:         #fbbf24;
+    --warn-soft:    #2a2113;
+    --ring:         #5b64c9;
+  }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv05' 1, 'ss03' 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Every figure in the app lines up in its column. */
+  .fig { font-variant-numeric: tabular-nums lining-nums; letter-spacing: -0.01em; }
+
+  /* Everything about the currency symbol is set here and nowhere else. */
+  .cur-sym {
+    font-family: var(--font-symbol);
+    font-size: 0.78em;
+    font-weight: 600;
+    margin-right: 0.16em;
+    position: relative;
+    top: -0.02em;
+    font-feature-settings: normal;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection { background: var(--accent-soft); color: var(--ink); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: .01ms !important;
+      transition-duration: .01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .surface { background: var(--surface); }
+
+  /* A ruled ledger row: hairline underneath, never a box. */
+  .row-rule { border-bottom: 1px solid var(--rule); }
+  .row-rule:last-child { border-bottom: 0; }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 14px;
+  }
+
+  /*
+    A panel tinted with whatever colour it carries. `--tint` is set inline from
+    the row's own hex, and color-mix blends it into the current surface, so the
+    same class works in both themes without a second palette.
+  */
+  .tinted {
+    background: color-mix(in srgb, var(--tint, var(--accent)) 7%, var(--surface));
+    border-color: color-mix(in srgb, var(--tint, var(--accent)) 32%, var(--rule));
+  }
+  .tinted:hover {
+    background: color-mix(in srgb, var(--tint, var(--accent)) 11%, var(--surface));
+    border-color: color-mix(in srgb, var(--tint, var(--accent)) 46%, var(--rule));
+  }
+  :root[data-theme='dark'] .tinted {
+    background: color-mix(in srgb, var(--tint, var(--accent)) 16%, var(--surface));
+    border-color: color-mix(in srgb, var(--tint, var(--accent)) 38%, var(--rule));
+  }
+  :root[data-theme='dark'] .tinted:hover {
+    background: color-mix(in srgb, var(--tint, var(--accent)) 22%, var(--surface));
+    border-color: color-mix(in srgb, var(--tint, var(--accent)) 52%, var(--rule));
+  }
+
+  .field {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--rule-strong);
+    border-radius: 10px;
+    padding: .5rem .7rem;
+    color: var(--ink);
+    font-size: .9375rem;
+    line-height: 1.4;
+    transition: border-color .12s ease, box-shadow .12s ease;
+  }
+  .field::placeholder { color: var(--ink-muted); }
+  .field:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+  .field:disabled { background: var(--surface-sunk); color: var(--ink-muted); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+    border-radius: 10px; padding: .5rem .85rem;
+    font-size: .9rem; font-weight: 550; line-height: 1.2;
+    border: 1px solid transparent; cursor: pointer;
+    transition: background-color .12s ease, border-color .12s ease, color .12s ease;
+    white-space: nowrap;
+  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover:not(:disabled) { filter: brightness(1.08); }
+
+  .btn-ghost { background: transparent; color: var(--ink-soft); border-color: var(--rule-strong); }
+  .btn-ghost:hover:not(:disabled) { background: var(--surface-sunk); color: var(--ink); }
+
+  .btn-quiet { background: transparent; color: var(--ink-muted); }
+  .btn-quiet:hover:not(:disabled) { background: var(--surface-sunk); color: var(--ink); }
+
+  .btn-danger { background: var(--debit); color: #fff; }
+  .btn-danger:hover:not(:disabled) { filter: brightness(1.08); }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: .35rem;
+    border-radius: 999px; padding: .2rem .6rem;
+    font-size: .78rem; font-weight: 500;
+    border: 1px solid var(--rule-strong); color: var(--ink-soft);
+    background: var(--surface);
+  }
+  .chip[data-on='true'] {
+    background: var(--accent-soft); border-color: var(--accent); color: var(--accent);
+  }
+
+  .credit { color: var(--credit); }
+  .debit  { color: var(--debit); }
+  .muted  { color: var(--ink-muted); }
+  .soft   { color: var(--ink-soft); }
+
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-sunk) 25%, var(--rule) 37%, var(--surface-sunk) 63%);
+    background-size: 400% 100%;
+    animation: shimmer 1.4s ease infinite;
+    border-radius: 6px;
+  }
+  @keyframes shimmer { 0% { background-position: 100% 0 } 100% { background-position: 0 0 } }
+
+  .scroll-thin::-webkit-scrollbar { width: 9px; height: 9px; }
+  .scroll-thin::-webkit-scrollbar-thumb {
+    background: var(--rule-strong); border-radius: 999px;
+    border: 2px solid var(--surface);
+  }
+  .scroll-thin::-webkit-scrollbar-track { background: transparent; }
+}
