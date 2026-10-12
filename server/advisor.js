@@ -437,6 +437,7 @@ export async function uncategorized() {
  * written as one ordinary transaction — never as a silent edit to a balance,
  * which would leave the ledger unable to explain itself.
  */
+
 export async function reconcile({ accountId, actualBalanceMinor, occurredOn, note }) {
   const account = await one('select * from accounts where id = $1', [accountId])
   if (!account) {
